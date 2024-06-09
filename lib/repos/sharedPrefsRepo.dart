@@ -33,8 +33,24 @@ class PrefsRepo {
 		def: initialize the prefix used in front of the name of variables used to store questions. Using this prefix we will figure out which subject the question belongs to.
 	*/
 	void initSubjectPrefix() {
-		this.subjectPrefix = prefs?.getInt("maxSubjectPrefix");
-		if(this.subjectPrefix == null) prefs?.setInt("maxSubjectPrefix", 0);
+		this.subjectPrefix = prefs?.getInt("totalSubjects");
+		if(this.subjectPrefix == null) prefs?.setInt("totalSubjects", 0);
+		
+		// set the default subject name for the -1 index
+		this.setSubject(-1, "Select a subject");
+	}
+
+	/*
+		def: add a subject
+		in: String - subjectName | the name to be added on the subject's list
+	*/
+	void addSubject(String subjectName) {
+		int currentTotalSubjects = this.totalSubjects; // get current number of subjects
+
+		this.setSubject(currentTotalSubjects, subjectName); // assign the subject name as the next subject
+		currentTotalSubjects++; // increment number of subjects
+
+		this.totalSubjects = currentTotalSubjects; // update number of subject
 	}
 
 	/*
@@ -55,6 +71,21 @@ class PrefsRepo {
 	String? getSubjectName(int subjectIndex) {
 		String? subjectName = prefs?.getString("subject${subjectIndex}");
 		return subjectName;
+	}
+
+	/*
+		def: finds the index or -1 of a given subject name
+		in: string - subjectName | the name of the subject
+		out: int | the index at which the subject name is found
+	*/
+	int getSubjectIndex(String subjectName) {
+		List<String> subjects = this.getSubjectNames();
+		int index = -1;
+		for(int i=0; i<subjects.length; i++) {
+			if(subjects[i] == subjectName) return i;
+		}
+
+		return -1;
 	}
 
 	/*
@@ -177,17 +208,21 @@ class PrefsRepo {
 		out: List<String> | A list with all subject names. Can be empty as well
 	*/
 	List<String> getSubjectNames() {
-		int maxSubjectIndex = prefs?.getInt("maxSubjectPrefix") ?? -1;
+		int maxSubjectIndex = this.totalSubjects;
 		if(maxSubjectIndex < 0) return [];
 
 		List<String> subjectNames = [];
 		for(int i=0; i<maxSubjectIndex; i++) {
 			String? subject = this.getSubjectName(i);
-			if(subject != null) subjectNames.add(subject);
+			if(subject != null && subject != "") subjectNames.add(subject);
 		}
 
 		return subjectNames;
 	}
+
 	int get totalQuestions => prefs?.getInt("totalQuestions") ?? 0;
 	void set totalQuestions(int val) => prefs?.setInt("totalQuestions", val);
+
+	int get totalSubjects => prefs?.getInt("totalSubjects") ?? 0;
+	void set totalSubjects(int val) => prefs?.setInt("totalSubjects", val);
 }

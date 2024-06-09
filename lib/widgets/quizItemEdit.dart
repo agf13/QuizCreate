@@ -33,6 +33,7 @@ class QuizItemEdit extends StatefulWidget {
 class _QuitItemEditState extends State<QuizItemEdit> {
 	String trashIconPath = "";
 	String currentSubject = "Select a subject";
+	int currentSubjectIndex = -1;
 
 	bool isNew = false;
 
@@ -268,19 +269,23 @@ class _QuitItemEditState extends State<QuizItemEdit> {
 	}
 
 	Widget subjectDropDown(BuildContext context) {
-		String newSubject = "";
+		String newSubject = ""; // init newSubject var to be used for creating new subjects
+		var pr = PrefsRepo.fromPref(widget.prefs); // init prefs repo
+
 		return SingleChildScrollView(
 			scrollDirection: Axis.horizontal, 
 			child: Row(
 				mainAxisAlignment: MainAxisAlignment.center,
 				children: [
+					// Label for the subject choosing drop-down
 					Text("Subject: "),
 					Padding(padding: EdgeInsets.only(left: 10),),
+					// Button that will display the subject, allow selecting a new one or creating one
 					ElevatedButton(
 						onLongPress: () => showDialog<String> (
 							context: context,
 							builder: (BuildContext context) => AlertDialog(
-								title: const Text("Create new subject"),
+								title: const Text("Create a subject"),
 								content: SizedBox(
 									width: 100,
 									height: 50,
@@ -293,12 +298,19 @@ class _QuitItemEditState extends State<QuizItemEdit> {
 								),
 								actions: <Widget>[	
 									TextButton(
+										// adding a subject
 										onPressed: () {
-											if(newSubject != "") setState(() => this.currentSubject = newSubject);
-											Navigator.pop(context, 'Cancel');
+											// saving the subject as a new one
+											if(newSubject != "") {
+												//var pr = PrefsRepo.fromPref(widget.prefs);
+												pr.addSubject(newSubject);
+											}
+
+											Navigator.pop(context, 'Add');
 										},
 										child: const Text('Add'),
 									),
+									// cancel subject creation
 									TextButton(
 										onPressed: () {
 											Navigator.pop(context, 'Cancel');
@@ -308,11 +320,46 @@ class _QuitItemEditState extends State<QuizItemEdit> {
 								]
 							),
 						),
-						onPressed: () {
-							var pr = PrefsRepo.fromPref(widget.prefs);
-							print(pr.getSubjectNames());
-						},
-						child: Text("${currentSubject}"),
+						// show all existing subjects
+						onPressed: () => showDialog<String> (
+							context: context,
+							builder: (BuildContext context) => AlertDialog(
+								title: const Text("Select a subject"),
+								content: SizedBox(
+									width: 100,
+									height: 50,
+									child: DropdownMenu<String>(
+										requestFocusOnTap: true,
+										label: const Text("Subject"),
+										onSelected: (String? text) {
+											int index = pr.getSubjectIndex(text ?? ""); // find the index of the subject
+											setState(() => this.currentSubjectIndex = index);
+										},
+										dropdownMenuEntries: pr.getSubjectNames()
+											.map<DropdownMenuEntry<String>>((String subject) {
+												return DropdownMenuEntry<String>(
+													value: subject,
+													label: subject,
+													enabled: true, // whether we can click the option
+													style: MenuItemButton.styleFrom(
+														foregroundColor: Colors.black,
+													),
+												);
+											}).toList(),
+									),
+								),
+								actions: <Widget>[	
+									// cancel subject creation
+									TextButton(
+										onPressed: () {
+											Navigator.pop(context, 'Ok');
+										},
+										child: const Text('Ok'),
+									),
+								]
+							),
+						),
+						child: Text("${pr.getSubjectName(this.currentSubjectIndex)}"),
 					),
 				],
 			),
