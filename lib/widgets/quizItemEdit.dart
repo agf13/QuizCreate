@@ -406,11 +406,11 @@ class _QuitItemEditState extends State<QuizItemEdit> {
 								var pr = PrefsRepo.fromPref(widget.prefs);
 								print(widget.question.toJson());
 
-								if(pr.getQuestionByNo(widget.index, null) == null) {
-									var res = pr.addQuestion(widget.question, null);
+								if(pr.getQuestionByNo(widget.index) == null) {
+									var res = pr.addQuestion(widget.question);
 								}
 								else {
-									var res = pr.updateQuestion(widget.question, widget.index, null);
+									var res = pr.updateQuestion(widget.question, widget.index);
 								}
 								
 							},

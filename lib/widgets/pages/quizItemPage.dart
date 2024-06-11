@@ -27,7 +27,7 @@ class _QuizItemPageState extends State<QuizItemPage> {
 	void initState() {
 		super.initState();
 		pr = PrefsRepo.fromPref(widget.prefs);
-		var question = pr?.getQuestionByNo(this.index, null);
+		var question = pr?.getQuestionByNo(this.index);
 		if(question == null) this.currentQuestion.text = "No questions at this point";
 		else{
 			setState(() {
@@ -47,7 +47,7 @@ class _QuizItemPageState extends State<QuizItemPage> {
 					},
 					onPressed: () {
 						var newIndex = this.index - 1;
-						var newQuestion = pr?.getQuestionByNo(newIndex, null) ?? QuizQuestion(text: "No more questions in front");
+						var newQuestion = pr?.getQuestionByNo(newIndex) ?? QuizQuestion(text: "No more questions in front");
 						setState(() {
 							this.index = newIndex;
 							this.currentQuestion = newQuestion;
@@ -69,7 +69,7 @@ class _QuizItemPageState extends State<QuizItemPage> {
 					},
 					onPressed: () {
 						var newIndex = this.index + 1;
-						var newQuestion = pr?.getQuestionByNo(newIndex, null) ?? QuizQuestion(text: "No other question from here on");
+						var newQuestion = pr?.getQuestionByNo(newIndex) ?? QuizQuestion(text: "No other question from here on");
 						setState(() {
 							this.index = newIndex;
 							this.currentQuestion = newQuestion;

@@ -29,7 +29,7 @@ class _QuizItemEditPageState extends State<QuizItemEditPage> {
 	void initState() {
 		super.initState();
 		pr = PrefsRepo.fromPref(widget.prefs);
-		var question = pr?.getQuestionByNo(this.index, null);
+		var question = pr?.getQuestionByNo(this.index);
 		if(question != null) {
 
 			setState(() {
@@ -54,7 +54,7 @@ class _QuizItemEditPageState extends State<QuizItemEditPage> {
 					},
 					onPressed: () {
 						var newIndex = this.index - 1;
-						var newQuestion = pr?.getQuestionByNo(newIndex, null) ?? QuizQuestion();
+						var newQuestion = pr?.getQuestionByNo(newIndex) ?? QuizQuestion();
 							setState(() {
 							this.currentQuestion = newQuestion;
 							this.index = newIndex;
@@ -73,7 +73,7 @@ class _QuizItemEditPageState extends State<QuizItemEditPage> {
 					},
 					onPressed: () {
 						var newIndex = this.index + 1;
-						var newQuestion = pr?.getQuestionByNo(newIndex, null) ?? QuizQuestion();
+						var newQuestion = pr?.getQuestionByNo(newIndex) ?? QuizQuestion();
 						setState(() {
 							this.currentQuestion = newQuestion;
 							this.index = newIndex;

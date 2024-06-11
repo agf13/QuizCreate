@@ -11,11 +11,13 @@ import 'quizOption.dart';
 
 class QuizQuestion extends BaseQuizItem {
 	List<QuizOption> answers;
+	String subject;
 	int correctAnswer;
 	bool answered = false;
 
-	QuizQuestion({answers, correctAnswer = -1, String? text, String? image}) : 
+	QuizQuestion({answers, correctAnswer = -1, String? text, String? image, String? subject}) : 
 		this.answers = answers ?? [],
+		this.subject = subject ?? "",
 		this.correctAnswer = correctAnswer,
 		super(text: text, image: image) {
 		// manually creating empty answers as fallback if needed
@@ -30,6 +32,7 @@ class QuizQuestion extends BaseQuizItem {
 	QuizQuestion.fromJson(Map<String, dynamic> json) :
 		this.answers = [],
 		this.correctAnswer = json['correctAnswer'] as int,
+		this.subject = json['subject'] as String,
 		super(text: json['text'] as String?, image: json['image'] as String?) {
 		this.id = json['id'] as int;
 		// initializing the list of options
@@ -51,6 +54,7 @@ class QuizQuestion extends BaseQuizItem {
 		'text': this.text,
 		'image': this.image,
 		'correctAnswer': this.correctAnswer,
-		'answers': this.answers
+		'answers': this.answers,
+		'subject': this.subject
 	};
 }

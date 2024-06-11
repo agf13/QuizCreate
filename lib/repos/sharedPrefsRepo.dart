@@ -8,16 +8,12 @@ import '../models/quizQuestion.dart';
 
 class PrefsRepo {
 	SharedPreferences? prefs;
-	int? subjectPrefix = 0;
-	
 
 	PrefsRepo() {
 		initMemory();
-		initSubjectPrefix();
 	}
 
 	PrefsRepo.fromPref(SharedPreferences? prefs) : this.prefs = prefs {
-		initSubjectPrefix();
 	}
 
 	/*
@@ -27,17 +23,6 @@ class PrefsRepo {
 		prefs = await SharedPreferences.getInstance();
 		var totalQuestions = this.totalQuestions;
 		if(totalQuestions == 0 || totalQuestions == null) this.totalQuestions = 0;
-	}
-
-	/*
-		def: initialize the prefix used in front of the name of variables used to store questions. Using this prefix we will figure out which subject the question belongs to.
-	*/
-	void initSubjectPrefix() {
-		this.subjectPrefix = prefs?.getInt("totalSubjects");
-		if(this.subjectPrefix == null) prefs?.setInt("totalSubjects", 0);
-		
-		// set the default subject name for the -1 index
-		this.setSubject(-1, "Select a subject");
 	}
 
 	/*
@@ -90,14 +75,13 @@ class PrefsRepo {
 
 	/*
 		def:	adds the question in the shared preferences
-		in:	question
+		in:		QuizQuestion - question
 		out:	the json string representation of the question
 	*/
-	String addQuestion(QuizQuestion q, int? prefix) {
-		String? prefixString = (prefix == null) ? "" : "${prefix}";
+	String addQuestion(QuizQuestion q) {
 		var stringQ = json.encode(q.toJson()); // convert to json string
-		var questionIndex = "${prefixString}question${this.totalQuestions}";
-		print("tAdding $questionIndex");
+		var questionIndex = "question${this.totalQuestions}";
+		print("\tAdding $questionIndex");
 
 		prefs?.setString(questionIndex, stringQ); // store the string
 		this.totalQuestions = this.totalQuestions + 1; // increment the number of questions (basically indexed from 0. Total number is one more then the number showned here
@@ -107,15 +91,14 @@ class PrefsRepo {
 
 	/*
 		def:	updates the question in the shared preferences at the given index
-		in:	question - QuizQuestion
-			index - int // the index of the question that we update
+		in:		QuizQuestion - question
+				int - index // the index of the question that we update
 		out:	the json string representation of the question
 	*/
-	String updateQuestion(QuizQuestion q, int index, int? prefix) {
-		String? prefixString = (prefix == null) ? "" : "${prefix}";
+	String updateQuestion(QuizQuestion q, int index) {
 		var stringQ = json.encode(q.toJson());	
-		var questionIndex = "${prefixString}question${index}";
-		print("\tUpdateint ${questionIndex}");
+		var questionIndex = "question${index}";
+		print("\tUpdate ${questionIndex}");
 
 		prefs?.setString(questionIndex, stringQ);
 		print("\t----- $questionIndex");
@@ -129,10 +112,9 @@ class PrefsRepo {
 		out: QuizQuestion? // the question that was just deleted
 		potential error: would return null in both the cases when the question does not exist and also in the cases when the prefs is not initiaized / does not exist
 	*/	
-	QuizQuestion? removeQuestion(int index, int? prefix) {
-		String? prefixString = (prefix == null) ? "" : "${prefix}";
-		var questionIndex = "${prefixString}question${index}";
-		print("\tDeleteing ${questionIndex}");
+	QuizQuestion? removeQuestion(int index) {
+		var questionIndex = "question${index}";
+		print("\tDelete ${questionIndex}");
 
 		var valueFromRemove = prefs?.getString(questionIndex);
 		if(valueFromRemove == null || valueFromRemove == "") return null; // if no question at the given index, return null.
@@ -147,10 +129,9 @@ class PrefsRepo {
 		in:	int - number of question
 		out: 	QuizQuestion? (if the question is found) | null (if the question was not found)
 	*/
-	QuizQuestion? getQuestionByNo(int number, int? prefix) {
-		String? prefixString = (prefix == null) ? "" : "${prefix}";
+	QuizQuestion? getQuestionByNo(int number) {
 		if(number > this.totalQuestions) return null;
-		var questionIndex = "{prefixString}question${number}";
+		var questionIndex = "question${number}";
 		print("\tGet question from ${questionIndex}");
 
 		var jsonString = prefs?.getString("question${number}");
@@ -168,27 +149,23 @@ class PrefsRepo {
 		var listQuestions = <QuizQuestion>[];
 		var totalNumber = this.totalQuestions;
 
-		int? prefix = null;
-
-		// for every different subject
-		int maxSubjectIndex = prefs?.getInt("maxSubjectPrefix") ?? -1;
-		for(var p=-1; p <= maxSubjectIndex; p++) {
-			p == -1 ? prefix = null : prefix = p;
-
-			// search for every potential question
-			int i=0;
-			String? jsonQuestion = null;
-			while((jsonQuestion = prefs?.getString("${prefix}question${i}")) != null) {
-				print("====== $i");
-				print(jsonQuestion);
-				i++;
+		int i=0;
+		String? jsonQuestion = null;
+		while((jsonQuestion = prefs?.getString("question${i}")) != null) {
+			print("====== $i");
+			print(jsonQuestion);
+			i++;
+			if(jsonQuestion != null) {
+				QuizQuestion question = QuizQuestion.fromJson(json.decode(jsonQuestion!));
+				listQuestions.add(question);
 			}
-			/* for(var i=0; i<= totalNumber; i++) {
-				var jsonQuestion = prefs?.getString("${prefix}question${i}");
-				print("====== $i");
-				print(jsonQuestion);
-			} */
 		}
+
+		/* for(var i=0; i<= totalNumber; i++) {
+			var jsonQuestion = prefs?.getString("${prefix}question${i}");
+			print("====== $i");
+			print(jsonQuestion);
+		} */
 	}
 
 	/*
@@ -202,6 +179,13 @@ class PrefsRepo {
 		}
 		this.totalQuestions = 0;
 	}
+
+	/*
+		def: get all questions for a given subject
+		in: string - subject | the name of the subject we are searching for
+		out: 
+	*/
+	//List<>
 
 	/*
 		def: get all subject names
